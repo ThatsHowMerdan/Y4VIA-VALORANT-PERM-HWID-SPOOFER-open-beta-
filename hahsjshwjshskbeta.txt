@@ -1,0 +1,103 @@
+#include <iostream>
+#include <windows.h>
+#include <thread>
+#include <atomic>
+#include <vector>
+#include <random>
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
+#include <d3d11.h>
+
+class ValorantSpooferBeta {
+private:
+    std::atomic<bool> isActive;
+    std::thread spoofThread;
+    std::vector<BYTE> originalHWID;
+
+    void spoofHWID() {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, 255);
+
+        for (size_t i = 0; i < originalHWID.size(); ++i) {
+            originalHWID[i] = static_cast<BYTE>(dis(gen));
+        }
+    }
+
+    void bypassVanguard() {
+        // Basit bir Vanguard atlatma denemesi
+        BYTE patchBytes[] = {0x90, 0x90, 0x90, 0x90, 0x90}; // NOP instructions
+        VirtualProtect(originalHWID.data(), originalHWID.size(), PAGE_EXECUTE_READWRITE, nullptr);
+        memcpy(originalHWID.data(), patchBytes, sizeof(patchBytes));
+        VirtualProtect(originalHWID.data(), originalHWID.size(), PAGE_EXECUTE_READ, nullptr);
+    }
+
+public:
+    ValorantSpooferBeta() : isActive(false) {
+        originalHWID.resize(16); // Örnek HWID boyutu
+        GetHWID(originalHWID.data(), originalHWID.size());
+    }
+
+    void activate() {
+        if (!isActive.exchange(true)) {
+            spoofThread = std::thread([this]() {
+                while (isActive) {
+                    spoofHWID();
+                    bypassVanguard();
+                    std::this_thread::sleep_for(std::chrono::seconds(5));
+                }
+            });
+        }
+    }
+
+    void deactivate() {
+        if (isActive.exchange(false)) {
+            if (spoofThread.joinable()) {
+                spoofThread.join();
+            }
+        }
+    }
+
+    std::vector<BYTE> getCurrentHWID() const {
+        return originalHWID;
+    }
+
+    static void GetHWID(BYTE* hwid, size_t size) {
+        // Basit bir HWID alma simülasyonu
+        for (size_t i = 0; i < size; ++i) {
+            hwid[i] = static_cast<BYTE>(i);
+        }
+    }
+};
+
+ValorantSpooferBeta spoofer;
+
+void RenderUI() {
+    ImGui::Begin("Y4VIA VALORANT HWID PERM SPOOFER (Beta)");
+
+    ImGui::Text("Current HWID:");
+    auto hwid = spoofer.getCurrentHWID();
+    for (const auto& byte : hwid) {
+        ImGui::Text("%02X", byte);
+    }
+
+    if (ImGui::Button("Spoof + Bypass")) {
+        spoofer.activate();
+    }
+
+    ImGui::End();
+}
+
+// Ana pencere ve DirectX kurulumu burada...
+
+int main() {
+    // DirectX ve ImGui kurulumu
+    // Ana döngü
+    while (true) {
+        // Mesaj işleme
+        RenderUI();
+        // Çizim işlemleri
+    }
+    return 0;
+}
