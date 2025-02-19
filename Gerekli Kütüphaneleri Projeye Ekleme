@@ -1,0 +1,51 @@
+Gerekli Kütüphaneler ve Projeye Ekleme
+
+1. DirectX SDK
+
+Projede DirectX kullanabilmek için DirectX Software Development Kit (SDK) eklenmelidir.
+
+Hangi Sürüm Kullanılmalı?
+
+	•	DirectX 11 SDK önerilir.
+	•	DirectX 12 de kullanılabilir, ancak gereksiz karmaşıklık yaratabilir.
+
+Nasıl Eklenir?
+
+	•	Eğer Visual Studio 2019 veya 2022 kullanıyorsanız, DirectX SDK zaten Windows 10 SDK ile birlikte gelir.
+	•	Windows 7 ve 8.1 kullanıcıları için: DirectX SDK (June 2010) indirilmeli ve yüklenmelidir.
+	•	Projeye d3d11.lib, d3dx11.lib gibi DirectX 11 kütüphanelerini ekleyin.
+
+Visual Studio’da Linker Ayarları:
+
+	1.	Project → Properties → Linker → Input → Additional Dependencies kısmına şunları ekleyin:
+
+d3d11.lib
+d3dx11.lib
+dxgi.lib
+
+
+	2.	Project → Properties → C/C++ → General → Additional Include Directories kısmına DirectX SDK’nın include dizinini ekleyin.
+
+2. ImGui (Dear ImGui Kütüphanesi)
+
+ImGui, C++ için hafif bir GUI kütüphanesidir. ImGui’nin DirectX 11 sürümü kullanılmalıdır.
+
+Nasıl Eklenir?
+
+	1.	ImGui’yi GitHub’dan indirin:
+	•	ImGui GitHub Sayfası
+	•	DirectX 11 için hazır sürüm
+	2.	Projenize aşağıdaki dosyaları ekleyin:
+	•	imgui.h, imgui.cpp, imgui_demo.cpp, imgui_draw.cpp, imgui_tables.cpp, imgui_widgets.cpp
+	•	backends/imgui_impl_dx11.h, imgui_impl_dx11.cpp
+	•	backends/imgui_impl_win32.h, imgui_impl_win32.cpp
+	3.	Visual Studio Ayarları
+
+	•	Project → Properties → C/C++ → Additional Include Directories kısmına ImGui dosya yolu eklenmeli.
+	•	Derleyicinin ImGui dosyalarını tanıması için bunları solution’a dahil edin.
+
+Özet
+
+	•	DirectX 11 SDK eklenmeli.
+	•	ImGui’nin DirectX 11 ve Win32 backend dosyaları projeye eklenmeli.
+	•	Visual Studio’da gerekli linker ve include ayarları yapılmalı.
